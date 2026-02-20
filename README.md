@@ -1,6 +1,6 @@
 # is-it-unreal
 
-**124-tool MCP server for controlling Unreal Engine from AI assistants.**
+**123-tool MCP server for controlling Unreal Engine from AI assistants.**
 
 > Control every aspect of Unreal Engine — actors, materials, blueprints, landscapes, animations, AI, and more — directly from Claude, ChatGPT, or any MCP-compatible AI assistant.
 
@@ -13,7 +13,7 @@ AI Assistant <--stdio--> Python MCP Server <--TCP:55557--> UE5 C++ Plugin
 The system has two components:
 
 1. **C++ Editor Plugin** (`UnrealMCP`) — Runs inside Unreal Editor, listens on TCP port 55557, executes commands on the game thread via `FTSTicker`
-2. **Python MCP Server** (`is-it-unreal`) — Bridges MCP protocol (stdio) to Unreal Engine (TCP), exposes 124 tools to AI assistants
+2. **Python MCP Server** (`is-it-unreal`) — Bridges MCP protocol (stdio) to Unreal Engine (TCP), exposes 123 tools to AI assistants
 
 An optional companion plugin (`GameplayHelpers`) provides runtime Blueprint helper functions for character input, animation, combat, and enemy AI — useful for rapid prototyping via AI.
 
@@ -77,7 +77,7 @@ is-it-unreal
 
 See [`docs/mcp-client-config.json`](docs/mcp-client-config.json) for additional client configurations.
 
-## Tools (124)
+## Tools (123)
 
 ### Actor Management (6)
 
@@ -358,7 +358,7 @@ Key rules at a glance:
 - Never call MCP tools in parallel — each creates an FTSTicker callback, and simultaneous callbacks crash the engine
 - Never import more than 2 textures before a lightweight pause — each 4K texture is ~64MB of RAM
 - Never use `World->DestroyActor()` in editor context — use `EditorActorSubsystem::DestroyActors()` instead
-- On Linux, the editor does NOT hot-reload `.so` files — check binary timestamps before debugging
+- UE5 does NOT hot-reload plugin binaries (`.so`/`.dll`/`.dylib`) — always rebuild and restart the editor after C++ changes
 
 ## License
 

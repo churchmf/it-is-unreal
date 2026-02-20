@@ -2,7 +2,7 @@
 name = "is-it-unreal"
 version = "1.0.0"
 description = "101-tool MCP server for controlling Unreal Engine from AI assistants"
-readme = "../README.md"
+readme = {text = "124-tool MCP server for controlling Unreal Engine from AI assistants. See https://github.com/flopperam/is-it-unreal for full documentation.", content-type = "text/plain"}
 requires-python = ">=3.10,<3.14"
 dependencies = [
   "mcp[cli]>=1.4.1",

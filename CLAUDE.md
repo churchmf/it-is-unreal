@@ -76,9 +76,12 @@ These 41 rules were learned the hard way through months of real-world Unreal Eng
 
 ## Binary vs Source Freshness
 
-29. **ALWAYS check if the compiled `.so` / `.dll` binary is newer than ALL source files BEFORE debugging runtime issues.** Linux UE5 does NOT hot-reload `.so` files. If the binary is older than any source file, the editor is running stale code. Stop investigating, rebuild the plugin, and restart the editor.
+29. **ALWAYS check if the compiled plugin binary is newer than ALL source files BEFORE debugging runtime issues.** UE5 does NOT hot-reload plugin binaries (`.so` on Linux, `.dll` on Windows, `.dylib` on macOS). If the binary is older than any source file, the editor is running stale code. Stop investigating, rebuild the plugin, and restart the editor.
 
-    Check timestamps: `stat -c %Y Plugins/*/Binaries/Linux/*.so` vs source `.cpp`/`.h` files.
+    Check timestamps:
+    - Linux: `stat -c %Y Plugins/*/Binaries/Linux/*.so` vs source `.cpp`/`.h` files
+    - Windows (PowerShell): `(Get-Item Plugins\*\Binaries\Win64\*.dll).LastWriteTime`
+    - macOS: `stat -f %m Plugins/*/Binaries/Mac/*.dylib`
 
 ## General MCP Rules
 
