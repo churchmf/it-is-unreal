@@ -1,0 +1,70 @@
+# is-it-unreal — Master Plan
+
+## Overview
+
+123-tool MCP server for controlling Unreal Engine from AI assistants. Extracted from the Blood & Dust game project as a standalone open-source tool.
+
+## Task ID Format
+
+| Prefix | Usage |
+|--------|-------|
+| `TASK-XXX` | Features and improvements |
+| `BUG-XXX` | Bug fixes |
+| `FEATURE-XXX` | Major features |
+| `INQUIRY-XXX` | Research/investigation |
+
+**Rules:**
+- IDs are sequential (TASK-001, TASK-002...)
+- Completed: ~~TASK-001~~ with strikethrough
+- Never reuse IDs
+
+## Roadmap
+
+| ID | Title | Priority | Status | Dependencies |
+|----|-------|----------|--------|--------------|
+| ~~TASK-001~~ | Extract and publish open-source project | P0 | DONE | - |
+| ~~TASK-002~~ | E2E testing and cross-platform audit | P1 | DONE | TASK-001 |
+| **TASK-003** | **Rename project to "it-is-unreal"** | **P2** | PENDING | - |
+
+## Active Work
+
+### TASK-003: Rename project to "it-is-unreal"
+
+Rename all occurrences of the project name across 3 variants:
+- `is-it-unreal` (kebab-case) -> `it-is-unreal` (~20 occurrences)
+- `is_it_unreal` (snake_case) -> `it_is_unreal` (~25 occurrences)
+- `IsItUnreal` (PascalCase) -> `ItIsUnreal` (1 occurrence)
+
+**Files to change:**
+- `server/is_it_unreal.py` -> rename to `it_is_unreal.py`
+- `server/pyproject.toml` — name, entry point, py-modules
+- `README.md` — title, references, config examples
+- `docs/mcp-client-config.json` — all path references
+- `plugin/UnrealMCP/UnrealMCP.uplugin` — DocsURL
+- `plugin/GameplayHelpers/GameplayHelpers.uplugin` — CreatedByURL, DocsURL
+- `server/helpers/advanced_buildings.py` — 9 lazy imports
+- `server/helpers/building_creation.py` — 1 lazy import
+- `server/helpers/infrastructure_creation.py` — 10 lazy imports
+
+Also rename the GitHub repo URL from `flopperam/is-it-unreal` to `flopperam/it-is-unreal`.
+
+**Effort:** Low (~10 min mechanical find-and-replace, zero risk)
+
+## Completed
+
+### ~~TASK-001~~: Extract and publish open-source project
+- Scaffolded project at `/media/endlessblink/data/my-projects/ai-development/game-dev/is-it-unreal/`
+- Copied 66 UnrealMCP C++ source files, applied 3 edits (BUILD_ID, MI path, DocsURL)
+- Copied Python server (6431 lines) + 21 helper files, renamed imports
+- Stripped GameplayHelpers (3642 -> 1215 lines), removed B&D-specific code
+- Wrote README (369 lines), CLAUDE.md (41 safety rules), example MCP config
+- MIT license, git init, initial commit (101 files, 42054 lines)
+
+### ~~TASK-002~~: E2E testing and cross-platform audit
+- All Python imports pass (main + 20 helpers + 123 tools)
+- Fixed pyproject.toml readme path (setuptools rejected parent dir ref)
+- Fixed logging FileHandler to use absolute path (Windows PermissionError)
+- Fixed tool count: 123 not 124 (duplicate set_actor_property removed)
+- Cross-platform audit: zero blockers, C++ uses only UE5 abstractions
+- Added Win/Mac timestamp commands to CLAUDE.md rule 29
+- Expanded README hot-reload note to all platforms
