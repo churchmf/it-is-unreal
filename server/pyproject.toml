@@ -1,8 +1,8 @@
 [project]
-name = "is-it-unreal"
+name = "it-is-unreal"
 version = "1.0.0"
 description = "101-tool MCP server for controlling Unreal Engine from AI assistants"
-readme = {text = "124-tool MCP server for controlling Unreal Engine from AI assistants. See https://github.com/flopperam/is-it-unreal for full documentation.", content-type = "text/plain"}
+readme = {text = "124-tool MCP server for controlling Unreal Engine from AI assistants. See https://github.com/flopperam/it-is-unreal for full documentation.", content-type = "text/plain"}
 requires-python = ">=3.10,<3.14"
 dependencies = [
   "mcp[cli]>=1.4.1",
@@ -12,12 +12,12 @@ dependencies = [
 ]
 
 [project.scripts]
-is-it-unreal = "is_it_unreal:main"
+it-is-unreal = "it_is_unreal:main"
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["is_it_unreal"]
+py-modules = ["it_is_unreal"]
 packages = ["helpers", "helpers.blueprint_graph"]

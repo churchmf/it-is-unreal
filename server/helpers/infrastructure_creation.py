@@ -29,7 +29,7 @@ def _create_street_grid(blocks: int, block_size: float, street_width: float, loc
     """Create a grid of streets for the town."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
         set_actor_transform = server.set_actor_transform
 
@@ -97,7 +97,7 @@ def _create_street_lights(blocks: int, block_size: float, location: List[float],
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
         set_actor_transform = server.set_actor_transform
 
@@ -151,7 +151,7 @@ def _create_town_vehicles(blocks: int, block_size: float, street_width: float, l
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
         set_actor_transform = server.set_actor_transform
 
@@ -191,7 +191,7 @@ def _create_town_decorations(blocks: int, block_size: float, location: List[floa
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
         set_actor_transform = server.set_actor_transform
 
@@ -248,7 +248,7 @@ def _create_traffic_lights(blocks: int, block_size: float, location: List[float]
         import random
         import math
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -307,7 +307,7 @@ def _create_street_signage(blocks: int, block_size: float, location: List[float]
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -394,7 +394,7 @@ def _create_sidewalks_crosswalks(blocks: int, block_size: float, street_width: f
     """Create sidewalks and crosswalks."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -506,7 +506,7 @@ def _create_urban_furniture(blocks: int, block_size: float, location: List[float
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -623,7 +623,7 @@ def _create_street_utilities(blocks: int, block_size: float, location: List[floa
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -711,7 +711,7 @@ def _create_central_plaza(blocks: int, block_size: float, location: List[float],
     try:
         import math
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()

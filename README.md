@@ -1,4 +1,4 @@
-# is-it-unreal
+# it-is-unreal
 
 **123-tool MCP server for controlling Unreal Engine from AI assistants.**
 
@@ -13,7 +13,7 @@ AI Assistant <--stdio--> Python MCP Server <--TCP:55557--> UE5 C++ Plugin
 The system has two components:
 
 1. **C++ Editor Plugin** (`UnrealMCP`) — Runs inside Unreal Editor, listens on TCP port 55557, executes commands on the game thread via `FTSTicker`
-2. **Python MCP Server** (`is-it-unreal`) — Bridges MCP protocol (stdio) to Unreal Engine (TCP), exposes 123 tools to AI assistants
+2. **Python MCP Server** (`it-is-unreal`) — Bridges MCP protocol (stdio) to Unreal Engine (TCP), exposes 123 tools to AI assistants
 
 An optional companion plugin (`GameplayHelpers`) provides runtime Blueprint helper functions for character input, animation, combat, and enemy AI — useful for rapid prototyping via AI.
 
@@ -36,7 +36,7 @@ Rebuild your project. The plugin is editor-only and loads automatically.
 
 ```bash
 cd server/
-uv run is_it_unreal.py
+uv run it_is_unreal.py
 ```
 
 Or install as a package:
@@ -44,7 +44,7 @@ Or install as a package:
 ```bash
 cd server/
 pip install -e .
-is-it-unreal
+it-is-unreal
 ```
 
 ### 3. Configure Your MCP Client
@@ -56,7 +56,7 @@ is-it-unreal
   "mcpServers": {
     "unrealMCP": {
       "command": "uv",
-      "args": ["--directory", "/path/to/is-it-unreal/server", "run", "is_it_unreal.py"]
+      "args": ["--directory", "/path/to/it-is-unreal/server", "run", "it_is_unreal.py"]
     }
   }
 }
@@ -69,7 +69,7 @@ is-it-unreal
   "mcpServers": {
     "unrealMCP": {
       "command": "uv",
-      "args": ["--directory", "/path/to/is-it-unreal/server", "run", "is_it_unreal.py"]
+      "args": ["--directory", "/path/to/it-is-unreal/server", "run", "it_is_unreal.py"]
     }
   }
 }
@@ -347,7 +347,7 @@ Contributions welcome. Please:
 4. Test against a live Unreal Editor instance
 5. Submit a pull request
 
-When adding new tools, follow the existing pattern: define the C++ handler in the plugin, register it in the appropriate handler class, and add the corresponding `@mcp.tool()` function in `is_it_unreal.py`.
+When adding new tools, follow the existing pattern: define the C++ handler in the plugin, register it in the appropriate handler class, and add the corresponding `@mcp.tool()` function in `it_is_unreal.py`.
 
 ## Safety Rules
 

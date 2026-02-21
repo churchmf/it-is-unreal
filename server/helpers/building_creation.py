@@ -18,7 +18,7 @@ def _create_town_building(building_type: str, location: List[float], max_size: f
         import random
 
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         construct_house = server.construct_house
         create_tower = server.create_tower
         from helpers.advanced_buildings import (

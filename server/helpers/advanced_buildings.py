@@ -30,7 +30,7 @@ def _create_skyscraper(height: int, base_width: float, base_depth: float, locati
     try:
         import random
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -130,7 +130,7 @@ def _create_office_tower(floors: int, width: float, depth: float, location: List
     """Create a modern office tower with glass facade appearance."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -211,7 +211,7 @@ def _create_apartment_complex(floors: int, units_per_floor: int, location: List[
     """Create a multi-unit residential complex with balconies."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -294,7 +294,7 @@ def _create_shopping_mall(width: float, depth: float, floors: int, location: Lis
     """Create a large shopping mall with entrance canopy."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -372,7 +372,7 @@ def _create_parking_garage(levels: int, width: float, depth: float, location: Li
     """Create a multi-level parking structure."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -469,7 +469,7 @@ def _create_hotel(floors: int, width: float, depth: float, location: List[float]
     """Create a luxury hotel with distinctive features."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -559,7 +559,7 @@ def _create_restaurant(width: float, depth: float, location: List[float], name_p
     """Create a small restaurant/cafe building."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -624,7 +624,7 @@ def _create_store(width: float, depth: float, location: List[float], name_prefix
     """Create a small retail store."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()
@@ -678,7 +678,7 @@ def _create_apartment_building(floors: int, width: float, depth: float, location
     """Create a smaller residential apartment building."""
     try:
         # Import here to avoid circular imports
-        import is_it_unreal as server
+        import it_is_unreal as server
         get_unreal_connection = server.get_unreal_connection
 
         unreal = get_unreal_connection()

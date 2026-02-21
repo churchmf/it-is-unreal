@@ -63,10 +63,10 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'is_it_unreal.log')),
+        logging.FileHandler(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'it_is_unreal.log')),
     ]
 )
-logger = logging.getLogger("IsItUnreal")
+logger = logging.getLogger("ItIsUnreal")
 
 # Configuration
 UNREAL_HOST = "127.0.0.1"
@@ -491,7 +491,7 @@ async def server_lifespan(server: FastMCP) -> AsyncIterator[Dict[str, Any]]:
 
 # Initialize server
 mcp = FastMCP(
-    "is-it-unreal",
+    "it-is-unreal",
     lifespan=server_lifespan
 )
 
@@ -6421,8 +6421,8 @@ def assign_behavior_tree(
 
 
 def main():
-    """Entry point for the is-it-unreal MCP server."""
-    logger.info("Starting is-it-unreal MCP server with stdio transport")
+    """Entry point for the it-is-unreal MCP server."""
+    logger.info("Starting it-is-unreal MCP server with stdio transport")
     mcp.run(transport='stdio')
 
 

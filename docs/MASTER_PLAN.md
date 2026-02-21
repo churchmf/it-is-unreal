@@ -1,4 +1,4 @@
-# is-it-unreal — Master Plan
+# it-is-unreal — Master Plan
 
 ## Overview
 
@@ -24,33 +24,15 @@
 |----|-------|----------|--------|--------------|
 | ~~TASK-001~~ | Extract and publish open-source project | P0 | DONE | - |
 | ~~TASK-002~~ | E2E testing and cross-platform audit | P1 | DONE | TASK-001 |
-| **TASK-003** | **Rename project to "it-is-unreal"** | **P2** | PENDING | - |
-
-## Active Work
-
-### TASK-003: Rename project to "it-is-unreal"
-
-Rename all occurrences of the project name across 3 variants:
-- `is-it-unreal` (kebab-case) -> `it-is-unreal` (~20 occurrences)
-- `is_it_unreal` (snake_case) -> `it_is_unreal` (~25 occurrences)
-- `IsItUnreal` (PascalCase) -> `ItIsUnreal` (1 occurrence)
-
-**Files to change:**
-- `server/is_it_unreal.py` -> rename to `it_is_unreal.py`
-- `server/pyproject.toml` — name, entry point, py-modules
-- `README.md` — title, references, config examples
-- `docs/mcp-client-config.json` — all path references
-- `plugin/UnrealMCP/UnrealMCP.uplugin` — DocsURL
-- `plugin/GameplayHelpers/GameplayHelpers.uplugin` — CreatedByURL, DocsURL
-- `server/helpers/advanced_buildings.py` — 9 lazy imports
-- `server/helpers/building_creation.py` — 1 lazy import
-- `server/helpers/infrastructure_creation.py` — 10 lazy imports
-
-Also rename the GitHub repo URL from `flopperam/is-it-unreal` to `flopperam/it-is-unreal`.
-
-**Effort:** Low (~10 min mechanical find-and-replace, zero risk)
+| ~~TASK-003~~ | Rename project to "it-is-unreal" | P2 | DONE | - |
 
 ## Completed
+
+### ~~TASK-003~~: Rename project to "it-is-unreal"
+- Renamed `server/is_it_unreal.py` → `server/it_is_unreal.py`
+- Replaced 22 kebab-case, 26 snake_case, 1 PascalCase occurrences across 11 files
+- Updated GitHub URLs in both .uplugin files and pyproject.toml
+- Regenerated uv.lock
 
 ### ~~TASK-001~~: Extract and publish open-source project
 - Scaffolded project at `/media/endlessblink/data/my-projects/ai-development/game-dev/is-it-unreal/`
