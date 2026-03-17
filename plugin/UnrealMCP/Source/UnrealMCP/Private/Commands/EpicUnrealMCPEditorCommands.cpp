@@ -6324,13 +6324,27 @@ TSharedPtr<FJsonObject> FEpicUnrealMCPEditorCommands::HandleGetEditorLog(const T
             FString::Printf(TEXT("Log file not found at: %s"), *LogFilePath));
     }
 
-    // Read the entire log file
-    FString LogContent;
-    if (!FFileHelper::LoadFileToString(LogContent, *LogFilePath))
+    // Use IPlatformFile to read the log even if it's locked by the editor for writing
+    IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+    TUniquePtr<IFileHandle> FileHandle(PlatformFile.OpenRead(*LogFilePath, true));
+    
+    if (!FileHandle)
     {
-        return FEpicUnrealMCPCommonUtils::CreateErrorResponse(
-            FString::Printf(TEXT("Failed to read log file: %s"), *LogFilePath));
+        return FEpicUnrealMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Failed to open log file: %s"), *LogFilePath));
     }
+
+    int64 FileSize = FileHandle->Size();
+    TArray<uint8> RawData;
+    RawData.SetNumUninitialized(FileSize);
+    
+    if (!FileHandle->Read(RawData.GetData(), FileSize))
+    {
+        return FEpicUnrealMCPCommonUtils::CreateErrorResponse(TEXT("Failed to read log file data"));
+    }
+
+    // Convert raw data to string
+    FString LogContent;
+    FFileHelper::BufferToString(LogContent, RawData.GetData(), RawData.Num());
 
     // Split into lines
     TArray<FString> AllLines;

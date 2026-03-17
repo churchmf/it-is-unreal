@@ -85,6 +85,7 @@ UEpicUnrealMCPBridge::UEpicUnrealMCPBridge()
     GameplayCommands = MakeShared<FEpicUnrealMCPGameplayCommands>();
     WidgetCommands = MakeShared<FEpicUnrealMCPWidgetCommands>();
     AICommands = MakeShared<FEpicUnrealMCPAICommands>();
+    ModelingCommands = MakeShared<FEpicUnrealMCPModelingCommands>();
 }
 
 UEpicUnrealMCPBridge::~UEpicUnrealMCPBridge()
@@ -93,11 +94,12 @@ UEpicUnrealMCPBridge::~UEpicUnrealMCPBridge()
     BlueprintCommands.Reset();
     BlueprintGraphCommands.Reset();
     MaterialGraphCommands.Reset();
+    LandscapeCommands.Reset();
     GameplayCommands.Reset();
     WidgetCommands.Reset();
     AICommands.Reset();
+    ModelingCommands.Reset();
 }
-
 // Initialize subsystem
 void UEpicUnrealMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -662,6 +664,12 @@ FString UEpicUnrealMCPBridge::ExecuteCommand(const FString& CommandType, const T
                      CommandType == TEXT("assign_behavior_tree"))
             {
                 ResultJson = AICommands->HandleCommand(CommandType, Params);
+            }
+            // Modeling Commands (Geometry Scripting)
+            else if (CommandType == TEXT("create_subdivided_plane") ||
+                     CommandType == TEXT("bake_procedural_mesh"))
+            {
+                ResultJson = ModelingCommands->HandleCommand(CommandType, Params);
             }
             else
             {

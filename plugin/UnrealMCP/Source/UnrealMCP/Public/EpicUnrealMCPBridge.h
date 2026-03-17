@@ -16,6 +16,7 @@
 #include "Commands/EpicUnrealMCPGameplayCommands.h"
 #include "Commands/EpicUnrealMCPWidgetCommands.h"
 #include "Commands/EpicUnrealMCPAICommands.h"
+#include "Commands/EpicUnrealMCPModelingCommands.h"
 #include "EpicUnrealMCPBridge.generated.h"
 
 class FMCPServerRunnable;
@@ -67,4 +68,5 @@ private:
 	TSharedPtr<FEpicUnrealMCPGameplayCommands> GameplayCommands;
 	TSharedPtr<FEpicUnrealMCPWidgetCommands> WidgetCommands;
 	TSharedPtr<FEpicUnrealMCPAICommands> AICommands;
+	TSharedPtr<FEpicUnrealMCPModelingCommands> ModelingCommands;
 }; 

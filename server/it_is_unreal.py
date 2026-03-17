@@ -116,6 +116,8 @@ class UnrealConnection:
         "take_screenshot",
         "create_niagara_system",
         "create_atmospheric_fx",
+        "create_subdivided_plane",
+        "bake_procedural_mesh",
     }
 
     # Commands that need a post-execution cooldown to let the engine
@@ -139,6 +141,8 @@ class UnrealConnection:
         "take_screenshot": 1.0,          # SceneCapture2D render + ReadPixels + PNG encode
         "create_niagara_system": 2.0,    # Niagara system creation + compile + save
         "create_atmospheric_fx": 3.0,   # Niagara system with module stack + compile
+        "create_subdivided_plane": 2.0,  # GeometryScript + StaticMesh baking
+        "bake_procedural_mesh": 2.0,     # DynamicMesh -> StaticMesh baking
     }
     
     def __init__(self):
@@ -6415,6 +6419,77 @@ def assign_behavior_tree(
         params["bb_path"] = bb_path
     try:
         response = unreal.send_command("assign_behavior_tree", params)
+        return response.get("result", response)
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+# ============================================================================
+# Modeling & Geometry Scripting Tools
+# ============================================================================
+
+@mcp.tool()
+def create_subdivided_plane(
+    name: str,
+    path: str = "/Game/Meshes/",
+    width: float = 100.0,
+    height: float = 100.0,
+    width_steps: int = 100,
+    height_steps: int = 100
+) -> Dict[str, Any]:
+    """
+    Create a high-poly subdivided plane asset using GeometryScript.
+
+    This tool creates a procedural rectangle mesh with specified subdivisions
+    and bakes it into a Static Mesh asset. Ideal for "Real Depth" materials
+    that use World Position Offset or Displacement.
+
+    Parameters:
+    - name: Name for the mesh asset (e.g., "SM_SubdividedPlane")
+    - path: Content browser path (default: "/Game/Meshes/")
+    - width: Width in Unreal units (default: 100.0)
+    - height: Height in Unreal units (default: 100.0)
+    - width_steps: Number of subdivisions along width (default: 100)
+    - height_steps: Number of subdivisions along height (default: 100)
+    """
+    unreal = get_unreal_connection()
+    params = {
+        "name": name,
+        "path": path,
+        "width": width,
+        "height": height,
+        "width_steps": width_steps,
+        "height_steps": height_steps
+    }
+    try:
+        response = unreal.send_command("create_subdivided_plane", params)
+        return response.get("result", response)
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+@mcp.tool()
+def bake_procedural_mesh(
+    dynamic_mesh_id: str,
+    asset_name: str,
+    destination_path: str = "/Game/Meshes/"
+) -> Dict[str, Any]:
+    """
+    Bake a DynamicMesh to a StaticMesh asset.
+
+    Parameters:
+    - dynamic_mesh_id: ID or reference to the dynamic mesh to bake
+    - asset_name: Name for the resulting StaticMesh asset
+    - destination_path: Content browser folder
+    """
+    unreal = get_unreal_connection()
+    params = {
+        "dynamic_mesh_id": dynamic_mesh_id,
+        "asset_name": asset_name,
+        "destination_path": destination_path
+    }
+    try:
+        response = unreal.send_command("bake_procedural_mesh", params)
         return response.get("result", response)
     except Exception as e:
         return {"success": False, "message": str(e)}
