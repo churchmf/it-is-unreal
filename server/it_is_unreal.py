@@ -2781,21 +2781,23 @@ def analyze_blueprint_graph(
     graph_name: str = "EventGraph",
     include_node_details: bool = True,
     include_pin_connections: bool = True,
-    trace_execution_flow: bool = True
+    trace_execution_flow: bool = True,
+    verbosity: str = "full"
 ) -> Dict[str, Any]:
     """
-    Analyze a specific graph within a Blueprint (EventGraph, functions, etc.)
-    and provide detailed information about nodes, connections, and execution flow.
+    Analyze a specific graph within a Blueprint (EventGraph, functions, etc.).
     
     Args:
         blueprint_path: Full path to the Blueprint asset
-        graph_name: Name of the graph to analyze ("EventGraph", function name, etc.)
-        include_node_details: Include detailed node properties and settings
+        graph_name: Name of the graph to analyze
+        include_node_details: Include detailed node properties
         include_pin_connections: Include all pin-to-pin connections
-        trace_execution_flow: Trace the execution flow through the graph
+        trace_execution_flow: Trace the execution flow
+        verbosity: "full" (all pins), "connected" (only pins with links), 
+                   "minimal" (no pins, only node types/titles)
     
     Returns:
-        Dictionary with graph analysis including nodes, connections, and flow
+        Dictionary with graph analysis
     """
     unreal = get_unreal_connection()
     if not unreal:
@@ -2806,27 +2808,217 @@ def analyze_blueprint_graph(
             "blueprint_path": blueprint_path,
             "graph_name": graph_name,
             "include_node_details": include_node_details,
-            "include_pin_connections": include_pin_connections,
+            "include_pin_connections": include_pin_connections if verbosity != "minimal" else False,
             "trace_execution_flow": trace_execution_flow
         }
         
-        logger.info(f"Analyzing Blueprint graph: {blueprint_path} -> {graph_name}")
         response = unreal.send_command("analyze_blueprint_graph", params)
         
         if response and response.get("success", False):
             graph_data = response.get("graph_data", {})
-            logger.info(f"Graph analysis complete:")
-            logger.info(f"  - Graph: {graph_data.get('graph_name', 'Unknown')}")
-            logger.info(f"  - Nodes: {len(graph_data.get('nodes', []))}")
-            logger.info(f"  - Connections: {len(graph_data.get('connections', []))}")
-            if graph_data.get('execution_paths'):
-                logger.info(f"  - Execution paths: {len(graph_data['execution_paths'])}")
+            
+            # Apply verbosity filtering in Python to save context
+            if verbosity in ["connected", "minimal"]:
+                for node in graph_data.get("nodes", []):
+                    if verbosity == "minimal":
+                        node.pop("pins", None)
+                    elif verbosity == "connected":
+                        if "pins" in node:
+                            node["pins"] = [p for p in node["pins"] if p.get("connections", 0) > 0 or p.get("direction") == "Output" and p.get("type") == "exec"]
+
+            return response
         
         return response or {"success": False, "message": "No response from Unreal"}
         
     except Exception as e:
         logger.error(f"analyze_blueprint_graph error: {e}")
         return {"success": False, "message": str(e)}
+
+@mcp.tool()
+def find_blueprint_nodes(
+    blueprint_path: str,
+    query: str,
+    search_fields: List[str] = ["title", "function_name", "variable_name", "event_name"],
+    graph_name: str = None
+) -> Dict[str, Any]:
+    """
+    Search for specific nodes within a Blueprint based on a semantic query.
+    Ideal for implementing the 'Anchor Pattern'.
+    
+    Args:
+        blueprint_path: Full path to the Blueprint asset
+        query: String to search for (case-insensitive)
+        search_fields: List of fields to search within
+        graph_name: Optional specific graph to search in (searches all if None)
+    """
+    unreal = get_unreal_connection()
+    if not unreal:
+        return {"success": False, "message": "Failed to connect to Unreal Engine"}
+    
+    try:
+        # Get all graphs to search
+        graphs_to_search = []
+        if graph_name:
+            graphs_to_search = [graph_name]
+        else:
+            # Get list of all graphs in the blueprint
+            content = read_blueprint_content(blueprint_path, 
+                                          include_event_graph=True, 
+                                          include_functions=True, 
+                                          include_variables=False, 
+                                          include_components=False, 
+                                          include_interfaces=False)
+            
+            if content.get("success"):
+                # Add function names
+                for func in content.get("functions", []):
+                    graphs_to_search.append(func.get("name"))
+                # Add "EventGraph" if it's there
+                if "EventGraph" not in graphs_to_search:
+                    graphs_to_search.append("EventGraph")
+            else:
+                # Fallback to EventGraph if content reading failed
+                graphs_to_search = ["EventGraph"]
+        
+        results = []
+        for g_name in graphs_to_search:
+            response = unreal.send_command("analyze_blueprint_graph", {
+                "blueprint_path": blueprint_path,
+                "graph_name": g_name,
+                "include_node_details": True,
+                "include_pin_connections": False
+            })
+
+            result_data = response.get("result", response)
+            if response and result_data.get("success"):
+                nodes = result_data.get("graph_data", {}).get("nodes", [])
+                for node in nodes:
+                    match = False
+                    for field in search_fields:
+                        val = str(node.get(field, "")).lower()
+                        if query.lower() in val:
+                            match = True
+                            break
+                    
+                    if match:
+                        results.append({
+                            "graph": g_name,
+                            "node_id": node.get("name"),
+                            "title": node.get("title"),
+                            "type": node.get("node_type"),
+                            "pos": [node.get("pos_x"), node.get("pos_y")]
+                        })
+        
+        return {"success": True, "matches": results, "count": len(results)}
+        
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+@mcp.tool()
+def get_execution_chain(
+    blueprint_path: str,
+    start_node_id: str,
+    max_depth: int = 15,
+    graph_name: str = "EventGraph"
+) -> Dict[str, Any]:
+    """
+    Trace the execution flow starting from a specific node.
+    Returns a linear list of nodes in the order they execute.
+    
+    Args:
+        blueprint_path: Full path to the Blueprint asset
+        start_node_id: The ID (name) of the node to start tracing from
+        max_depth: Maximum number of nodes to trace
+        graph_name: Graph containing the nodes
+    """
+    unreal = get_unreal_connection()
+    if not unreal:
+        return {"success": False, "message": "Failed to connect to Unreal Engine"}
+    
+    try:
+        response = unreal.send_command("analyze_blueprint_graph", {
+            "blueprint_path": blueprint_path,
+            "graph_name": graph_name,
+            "include_node_details": True,
+            "include_pin_connections": True
+        })
+        
+        result_data = response.get("result", response)
+        if not result_data.get("success"):
+            return result_data
+            
+        nodes = {n["name"]: n for n in result_data["graph_data"]["nodes"]}
+        connections = result_data["graph_data"]["connections"]
+        
+        chain = []
+        current_node_id = start_node_id
+        
+        visited = set()
+        
+        for _ in range(max_depth):
+            if current_node_id not in nodes or current_node_id in visited:
+                break
+                
+            visited.add(current_node_id)
+            node = nodes[current_node_id]
+            
+            chain_item = {
+                "node_id": node["name"],
+                "title": node["title"],
+                "type": node.get("node_type", node["class"])
+            }
+            
+            # If it's a call function, include the function name
+            if "function_name" in node:
+                chain_item["function"] = node["function_name"]
+            
+            chain.append(chain_item)
+            
+            # Find the next node via 'then' or other exec output pins
+            next_node_id = None
+            for conn in connections:
+                if conn["from_node"] == current_node_id:
+                    # Look for pins that are 'then', 'execute', or named exec outputs
+                    # This is a heuristic; real logic would check pin types
+                    from_pin = conn["from_pin"].lower()
+                    if from_pin in ["then", "execute", "completed", "out"]:
+                        next_node_id = conn["to_node"]
+                        break
+            
+            if not next_node_id:
+                break
+            current_node_id = next_node_id
+            
+        return {"success": True, "chain": chain, "length": len(chain)}
+        
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+@mcp.tool()
+def find_callers_of_function(
+    function_name: str,
+    search_path: str = "/Game/"
+) -> Dict[str, Any]:
+    """
+    Find all Blueprints that call a specific function or use a specific variable.
+    Cross-reference tool for impact analysis.
+    
+    Args:
+        function_name: Name of the function to search for
+        search_path: Content path to search within
+    """
+    unreal = get_unreal_connection()
+    if not unreal:
+        return {"success": False, "message": "Failed to connect to Unreal Engine"}
+        
+    # This requires a more complex search across the Asset Registry or 
+    # iterating through blueprints. For now, we'll implement it as a 
+    # placeholder that explains the requirement for a C++ search command.
+    return {
+        "success": False, 
+        "message": "This operation requires a full project scan. Please use 'list_assets' to find candidates, then 'find_blueprint_nodes' on each candidate."
+    }
+
 
 @mcp.tool()
 def get_blueprint_variable_details(

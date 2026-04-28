@@ -65,6 +65,14 @@
 #include "Animation/AnimSequence.h"
 #include "K2Node_CallFunction.h"
 #include "K2Node_DynamicCast.h"
+#include "K2Node_IfThenElse.h"
+#include "K2Node_ExecutionSequence.h"
+#include "K2Node_Composite.h"
+#include "K2Node_ComponentBoundEvent.h"
+#include "K2Node_CustomEvent.h"
+#include "K2Node_Timeline.h"
+#include "K2Node_CallMaterialParameterCollectionFunction.h"
+#include "K2Node_MacroInstance.h"
 #include "Kismet/KismetMathLibrary.h"
 // BlendSpace1D locomotion includes
 #include "Animation/BlendSpace1D.h"
@@ -1807,6 +1815,74 @@ TSharedPtr<FJsonObject> FEpicUnrealMCPBlueprintCommands::HandleAnalyzeBlueprintG
                 NodeObj->SetNumberField(TEXT("pos_x"), Node->NodePosX);
                 NodeObj->SetNumberField(TEXT("pos_y"), Node->NodePosY);
                 NodeObj->SetBoolField(TEXT("can_rename"), Node->bCanRenameNode);
+
+                // Specific node type metadata extraction
+                if (UK2Node_CallFunction* CallFuncNode = Cast<UK2Node_CallFunction>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("CallFunction"));
+                    NodeObj->SetStringField(TEXT("function_name"), CallFuncNode->FunctionReference.GetMemberName().ToString());
+                    if (CallFuncNode->FunctionReference.GetMemberParentClass())
+                    {
+                        NodeObj->SetStringField(TEXT("member_parent"), CallFuncNode->FunctionReference.GetMemberParentClass()->GetName());
+                    }
+                    NodeObj->SetBoolField(TEXT("is_pure"), CallFuncNode->IsNodePure());
+                }
+                else if (UK2Node_CallMaterialParameterCollectionFunction* MPCNode = Cast<UK2Node_CallMaterialParameterCollectionFunction>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("CallMaterialParameterCollection"));
+                    NodeObj->SetStringField(TEXT("function_name"), MPCNode->FunctionReference.GetMemberName().ToString());
+                }
+                else if (UK2Node_VariableGet* VarGetNode = Cast<UK2Node_VariableGet>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("VariableGet"));
+                    NodeObj->SetStringField(TEXT("variable_name"), VarGetNode->VariableReference.GetMemberName().ToString());
+                    NodeObj->SetBoolField(TEXT("is_local"), VarGetNode->VariableReference.IsLocalScope());
+                }
+                else if (UK2Node_VariableSet* VarSetNode = Cast<UK2Node_VariableSet>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("VariableSet"));
+                    NodeObj->SetStringField(TEXT("variable_name"), VarSetNode->VariableReference.GetMemberName().ToString());
+                    NodeObj->SetBoolField(TEXT("is_local"), VarSetNode->VariableReference.IsLocalScope());
+                }
+                else if (UK2Node_Event* EventNode = Cast<UK2Node_Event>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("Event"));
+                    NodeObj->SetStringField(TEXT("event_name"), EventNode->EventReference.GetMemberName().ToString());
+                }
+                else if (UK2Node_CustomEvent* CustomEventNode = Cast<UK2Node_CustomEvent>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("CustomEvent"));
+                    NodeObj->SetStringField(TEXT("custom_event_name"), CustomEventNode->CustomFunctionName.ToString());
+                }
+                else if (UK2Node_IfThenElse* BranchNode = Cast<UK2Node_IfThenElse>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("Branch"));
+                }
+                else if (UK2Node_ExecutionSequence* SeqNode = Cast<UK2Node_ExecutionSequence>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("ExecutionSequence"));
+                }
+                else if (UK2Node_DynamicCast* CastNode = Cast<UK2Node_DynamicCast>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("DynamicCast"));
+                    if (CastNode->TargetType)
+                    {
+                        NodeObj->SetStringField(TEXT("target_type"), CastNode->TargetType->GetName());
+                    }
+                }
+                else if (UK2Node_Timeline* TimelineNode = Cast<UK2Node_Timeline>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("Timeline"));
+                    NodeObj->SetStringField(TEXT("timeline_name"), TimelineNode->TimelineName.ToString());
+                }
+                else if (UK2Node_MacroInstance* MacroNode = Cast<UK2Node_MacroInstance>(Node))
+                {
+                    NodeObj->SetStringField(TEXT("node_type"), TEXT("MacroInstance"));
+                    if (MacroNode->GetMacroGraph())
+                    {
+                        NodeObj->SetStringField(TEXT("macro_name"), MacroNode->GetMacroGraph()->GetName());
+                    }
+                }
             }
 
             // Include pin information if requested
@@ -1817,11 +1893,33 @@ TSharedPtr<FJsonObject> FEpicUnrealMCPBlueprintCommands::HandleAnalyzeBlueprintG
                 {
                     if (Pin)
                     {
+                        // Optimization: Skip hidden pins unless they have connections
+                        if (Pin->bHidden && Pin->LinkedTo.Num() == 0) continue;
+
                         TSharedPtr<FJsonObject> PinObj = MakeShared<FJsonObject>();
                         PinObj->SetStringField(TEXT("name"), Pin->PinName.ToString());
                         PinObj->SetStringField(TEXT("type"), Pin->PinType.PinCategory.ToString());
+                        PinObj->SetStringField(TEXT("sub_category"), Pin->PinType.PinSubCategory.ToString());
+                        if (Pin->PinType.PinSubCategoryObject.IsValid())
+                        {
+                            PinObj->SetStringField(TEXT("sub_category_object"), Pin->PinType.PinSubCategoryObject->GetName());
+                        }
                         PinObj->SetStringField(TEXT("direction"), Pin->Direction == EGPD_Input ? TEXT("Input") : TEXT("Output"));
                         PinObj->SetNumberField(TEXT("connections"), Pin->LinkedTo.Num());
+                        
+                        // Default value for unconnected input pins
+                        if (Pin->Direction == EGPD_Input && Pin->LinkedTo.Num() == 0)
+                        {
+                            if (!Pin->DefaultValue.IsEmpty())
+                            {
+                                PinObj->SetStringField(TEXT("default_value"), Pin->DefaultValue);
+                            }
+                            if (Pin->DefaultObject)
+                            {
+                                PinObj->SetStringField(TEXT("default_object"), Pin->DefaultObject->GetPathName());
+                            }
+                        }
+
                         
                         // Record connections for this pin
                         for (UEdGraphPin* LinkedPin : Pin->LinkedTo)
